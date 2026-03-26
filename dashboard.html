@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Student Dashboard</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+<!-- Sidebar -->
+
+<div class="sidebar">
+
+<h2>🏨 HostelCare</h2>
+
+<ul>
+
+<li>🏠 Dashboard</li>
+<li>📝 Submit Complaint</li>
+<li>📋 My Complaints</li>
+<li onclick="logout()">🚪 Logout</li>
+
+</ul>
+
+</div>
+
+
+<!-- Main Dashboard -->
+
+<div class="main-dashboard">
+
+<h1>Student Dashboard</h1>
+
+
+<!-- Complaint Form -->
+
+<div class="dashboard-card">
+
+<h2>Submit Complaint</h2>
+
+<input type="text" id="room" placeholder="Room Number">
+
+<select id="issueType">
+
+<option value="">Select Issue Type</option>
+<option value="Electricity">⚡ Electricity</option>
+<option value="Water">💧 Water Leakage</option>
+<option value="WiFi">📶 WiFi Problem</option>
+<option value="Furniture">🪑 Furniture Damage</option>
+<option value="Cleaning">🧹 Cleaning Issue</option>
+
+</select>
+
+<select id="priority">
+
+<option value="1">High Priority</option>
+<option value="2">Medium Priority</option>
+<option value="3">Low Priority</option>
+
+</select>
+
+<button onclick="submitComplaint()">Submit Complaint</button>
+
+</div>
+
+
+<!-- Complaint History -->
+
+<div class="dashboard-card">
+
+<h2>My Complaints</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Room</th>
+<th>Issue</th>
+<th>Priority</th>
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody id="studentComplaintTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

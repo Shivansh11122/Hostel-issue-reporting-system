@@ -87,6 +87,7 @@ Submit complaints and track status.
 
 ### Admin Dashboard
 Manage complaints and assign staff.
+<img width="1915" height="905" alt="Image" src="https://github.com/user-attachments/assets/11590caa-c1af-4730-b31f-165210b7b78f" />
 
 ---
 

@@ -83,6 +83,7 @@ The system automatically assigns maintenance staff based on their skills and tra
 
 ### Student Dashboard
 Submit complaints and track status.
+<img width="1894" height="912" alt="Image" src="https://github.com/user-attachments/assets/ef3e71be-2987-4cfc-85e2-33f361040227" />
 
 ### Admin Dashboard
 Manage complaints and assign staff.

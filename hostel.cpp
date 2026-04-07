@@ -2,47 +2,72 @@
 #include <queue>
 #include <vector>
 #include <algorithm>
+
 using namespace std;
 
 // Complaint structure
-struct Complaint {
+struct Complaint{
     int id;
     string studentName;
+    string block;
+    int room;
     string issueType;
     int priority;
+    string status;
+    string staff;
 };
 
-// Comparator for Priority Queue
-struct ComparePriority {
-    bool operator()(Complaint a, Complaint b) {
-        return a.priority > b.priority; // smaller number = higher priority
+// Staff structure
+struct Staff{
+    string name;
+    string skill;
+    bool available;
+};
+
+// Priority Queue Comparator
+struct ComparePriority{
+    bool operator()(Complaint a, Complaint b){
+        return a.priority > b.priority; // High priority first
     }
 };
 
-// Global Priority Queue
 priority_queue<Complaint, vector<Complaint>, ComparePriority> complaintQueue;
-
 vector<Complaint> complaintList;
+
+vector<Staff> staffList = {
+    {"Raj","Electricity",true},
+    {"Amit","Water",true},
+    {"Suresh","WiFi",true},
+    {"Ravi","Furniture",true},
+    {"Deepak","Cleaning",true}
+};
 
 int complaintID = 1;
 
 
-// Add complaint
-void addComplaint() {
+// Submit Complaint
+void submitComplaint(){
 
     Complaint c;
 
     c.id = complaintID++;
 
-    cout << "Enter Student Name: ";
-    cin >> c.studentName;
+    cout<<"Enter Student Name: ";
+    cin>>c.studentName;
 
-    cout << "Select Issue Type\n";
-    cout << "1. Electricity\n2. Water\n3. WiFi\n4. Furniture\n5. Cleaning\n";
+    cout<<"Enter Block (A-G): ";
+    cin>>c.block;
+
+    cout<<"Enter Room Number (1-100): ";
+    cin>>c.room;
+
+    cout<<"Select Issue\n";
+    cout<<"1 Electricity\n2 Water\n3 WiFi\n4 Furniture\n5 Cleaning\n";
+
     int choice;
-    cin >> choice;
+    cin>>choice;
 
-    switch(choice) {
+    switch(choice){
         case 1: c.issueType="Electricity"; break;
         case 2: c.issueType="Water"; break;
         case 3: c.issueType="WiFi"; break;
@@ -51,115 +76,199 @@ void addComplaint() {
         default: c.issueType="Other";
     }
 
-    cout << "Enter Priority (1=High,2=Medium,3=Low): ";
-    cin >> c.priority;
+    cout<<"Enter Priority (1 High / 2 Medium / 3 Low): ";
+    cin>>c.priority;
+
+    c.status="Pending";
+    c.staff="None";
 
     complaintQueue.push(c);
     complaintList.push_back(c);
 
-    cout << "\nComplaint Submitted Successfully\n";
+    cout<<"\nComplaint Submitted Successfully\n";
 }
 
 
-// Display complaints (priority wise)
-void showComplaints() {
+// Display Complaints
+void showComplaints(){
 
-    priority_queue<Complaint, vector<Complaint>, ComparePriority> temp = complaintQueue;
+    if(complaintList.empty()){
+        cout<<"No complaints found\n";
+        return;
+    }
 
-    cout << "\nComplaints by Priority\n";
+    cout<<"\nAll Complaints\n";
 
-    while(!temp.empty()) {
+    for(auto &c:complaintList){
 
-        Complaint c = temp.top();
-        temp.pop();
-
-        cout << "ID: " << c.id
-             << " | Student: " << c.studentName
-             << " | Issue: " << c.issueType
-             << " | Priority: " << c.priority
-             << endl;
+        cout<<"ID:"<<c.id
+            <<" | Student:"<<c.studentName
+            <<" | Block:"<<c.block
+            <<" | Room:"<<c.room
+            <<" | Issue:"<<c.issueType
+            <<" | Priority:"<<c.priority
+            <<" | Status:"<<c.status
+            <<" | Staff:"<<c.staff
+            <<endl;
     }
 }
 
 
-// Sort complaints using Merge Sort idea (STL sort here)
-void sortComplaints() {
+// Sort Complaints (Merge Sort idea)
+void sortComplaints(){
 
-    sort(complaintList.begin(), complaintList.end(),
+    sort(complaintList.begin(),complaintList.end(),
     [](Complaint a, Complaint b){
-        return a.priority < b.priority;
+        return a.priority<b.priority;
     });
 
-    cout << "\nSorted Complaints\n";
+    cout<<"\nComplaints Sorted by Priority\n";
 
-    for(auto &c : complaintList) {
+    for(auto &c:complaintList){
 
-        cout << "ID: " << c.id
-             << " | Issue: " << c.issueType
-             << " | Priority: " << c.priority
-             << endl;
+        cout<<"ID:"<<c.id
+            <<" | Issue:"<<c.issueType
+            <<" | Priority:"<<c.priority
+            <<endl;
     }
 }
 
 
-// Staff allocation (simple greedy)
-void allocateStaff() {
+// Allocate Staff
+void allocateStaff(){
 
-    if(complaintQueue.empty()) {
-        cout << "\nNo complaints available\n";
+    if(complaintQueue.empty()){
+        cout<<"No complaints in queue\n";
         return;
     }
 
     Complaint c = complaintQueue.top();
     complaintQueue.pop();
 
-    cout << "\nAllocating Staff...\n";
+    cout<<"\nAllocating Staff for Complaint ID "<<c.id<<"\n";
 
-    if(c.issueType == "Electricity")
-        cout << "Electrician assigned\n";
+    for(auto &s:staffList){
 
-    else if(c.issueType == "Water")
-        cout << "Plumber assigned\n";
+        if(s.skill==c.issueType && s.available){
 
-    else if(c.issueType == "WiFi")
-        cout << "Network Technician assigned\n";
+            s.available=false;
 
-    else if(c.issueType == "Furniture")
-        cout << "Carpenter assigned\n";
+            for(auto &comp:complaintList){
+                if(comp.id==c.id){
+                    comp.staff=s.name;
+                    comp.status="In Progress";
+                }
+            }
 
-    else if(c.issueType == "Cleaning")
-        cout << "Cleaning Staff assigned\n";
+            cout<<"Staff "<<s.name<<" assigned\n";
+            return;
+        }
+    }
 
-    cout << "Complaint ID " << c.id << " is being resolved\n";
+    cout<<"No staff available currently\n";
 }
 
 
-// Menu
-int main() {
+// Update Complaint Status
+void updateStatus(){
+
+    int id;
+    cout<<"Enter Complaint ID: ";
+    cin>>id;
+
+    for(auto &c:complaintList){
+
+        if(c.id==id){
+
+            cout<<"1 Pending\n2 In Progress\n3 Solved\n";
+            int s;
+            cin>>s;
+
+            if(s==1) c.status="Pending";
+            if(s==2) c.status="In Progress";
+            if(s==3){
+                c.status="Solved";
+
+                for(auto &staff:staffList){
+                    if(staff.name==c.staff){
+                        staff.available=true;
+                    }
+                }
+            }
+
+            cout<<"Status Updated\n";
+            return;
+        }
+    }
+
+    cout<<"Complaint not found\n";
+}
+
+
+// Delete Complaint
+void deleteComplaint(){
+
+    int id;
+    cout<<"Enter Complaint ID to delete: ";
+    cin>>id;
+
+    complaintList.erase(
+        remove_if(complaintList.begin(),complaintList.end(),
+        [id](Complaint c){return c.id==id;}),
+
+        complaintList.end()
+    );
+
+    cout<<"Complaint Deleted\n";
+}
+
+
+// Show Staff
+void showStaff(){
+
+    cout<<"\nMaintenance Staff\n";
+
+    for(auto &s:staffList){
+
+        cout<<"Name:"<<s.name
+            <<" | Skill:"<<s.skill
+            <<" | Status:"<<(s.available?"Available":"Busy")
+            <<endl;
+    }
+}
+
+
+// Main Menu
+int main(){
 
     int choice;
 
-    while(true) {
+    while(true){
 
-        cout << "\nHOSTEL ISSUE REPORTING SYSTEM\n";
-        cout << "1. Submit Complaint\n";
-        cout << "2. Show Complaints\n";
-        cout << "3. Sort Complaints\n";
-        cout << "4. Allocate Staff\n";
-        cout << "5. Exit\n";
+        cout<<"\nHOSTEL ISSUE REPORTING SYSTEM\n";
+        cout<<"1 Submit Complaint\n";
+        cout<<"2 Show Complaints\n";
+        cout<<"3 Sort Complaints\n";
+        cout<<"4 Allocate Staff\n";
+        cout<<"5 Update Complaint Status\n";
+        cout<<"6 Delete Complaint\n";
+        cout<<"7 Show Staff\n";
+        cout<<"8 Exit\n";
 
-        cout << "Enter choice: ";
-        cin >> choice;
+        cout<<"Enter choice: ";
+        cin>>choice;
 
-        switch(choice) {
+        switch(choice){
 
-            case 1: addComplaint(); break;
+            case 1: submitComplaint(); break;
             case 2: showComplaints(); break;
             case 3: sortComplaints(); break;
             case 4: allocateStaff(); break;
-            case 5: return 0;
-            default: cout << "Invalid choice\n";
+            case 5: updateStatus(); break;
+            case 6: deleteComplaint(); break;
+            case 7: showStaff(); break;
+            case 8: return 0;
+            default: cout<<"Invalid choice\n";
         }
-
     }
 }

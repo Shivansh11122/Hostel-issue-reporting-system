@@ -5,6 +5,7 @@
 
 <title>Student Dashboard</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 
 </head>
@@ -24,6 +25,7 @@
 <li>🏠 Dashboard</li>
 <li>📝 Submit Complaint</li>
 <li>📋 My Complaints</li>
+<li>⭐ Feedback</li>
 <li onclick="logout()">🚪 Logout</li>
 
 </ul>
@@ -35,20 +37,78 @@
 
 <div class="main-dashboard">
 
-<h1>Student Dashboard</h1>
+<h1>🎓 Student Dashboard</h1>
+
+<h3 id="welcomeUser"></h3>
+
+
+<!-- Emergency Contacts -->
+
+<div class="dashboard-card">
+
+<h2>📞 Emergency Contacts</h2>
+
+<p><b>Hostel Warden:</b> +91 9876543211</p>
+<p><b>Security:</b> +91 9876943212</p>
+<p><b>Electrician:</b> +91 9878743213</p>
+<p><b>Plumber:</b> +91 9876596214</p>
+
+</div>
+
+
+<!-- Notice Board -->
+
+<div class="dashboard-card">
+
+<h2>📢 Hostel Notice Board</h2>
+
+<ul>
+<li>Water supply maintenance tomorrow 10 AM – 12 PM</li>
+<li>WiFi upgrade scheduled on Sunday</li>
+<li>Hostel cultural event on 17 April 2026</li>
+</ul>
+
+</div>
 
 
 <!-- Complaint Form -->
 
 <div class="dashboard-card">
 
-<h2>Submit Complaint</h2>
+<h2>📝 Submit Complaint</h2>
 
-<input type="text" id="room" placeholder="Room Number">
+<div class="form-row">
+
+<label>Block</label>
+
+<select id="block">
+<option value="">Select Block</option>
+<option>A</option>
+<option>B</option>
+<option>C</option>
+<option>D</option>
+<option>E</option>
+<option>F</option>
+<option>G</option>
+</select>
+
+</div>
+
+
+<div class="form-row">
+
+<label>Room Number</label>
+
+<input type="number" id="room" min="1" max="100" placeholder="Enter Room Number">
+
+</div>
+
+
+<label>Issue Type</label>
 
 <select id="issueType">
 
-<option value="">Select Issue Type</option>
+<option value="">Select Issue</option>
 <option value="Electricity">⚡ Electricity</option>
 <option value="Water">💧 Water Leakage</option>
 <option value="WiFi">📶 WiFi Problem</option>
@@ -57,6 +117,9 @@
 
 </select>
 
+
+<label>Priority</label>
+
 <select id="priority">
 
 <option value="1">High Priority</option>
@@ -64,6 +127,7 @@
 <option value="3">Low Priority</option>
 
 </select>
+
 
 <button onclick="submitComplaint()">Submit Complaint</button>
 
@@ -74,28 +138,54 @@
 
 <div class="dashboard-card">
 
-<h2>My Complaints</h2>
+<h2>📋 My Complaints</h2>
 
 <table>
 
 <thead>
 
 <tr>
-
+<th>Block</th>
 <th>Room</th>
 <th>Issue</th>
 <th>Priority</th>
 <th>Status</th>
-
 </tr>
 
 </thead>
 
-<tbody id="studentComplaintTable">
-
-</tbody>
+<tbody id="studentComplaintTable"></tbody>
 
 </table>
+
+</div>
+
+
+<!-- ⭐ Feedback System -->
+
+<div class="dashboard-card">
+
+<h2>⭐ Hostel Feedback</h2>
+
+<p>Please rate hostel services:</p>
+
+<select id="feedbackRating">
+
+<option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+<option value="4">⭐⭐⭐⭐ Good</option>
+<option value="3">⭐⭐⭐ Average</option>
+<option value="2">⭐⭐ Poor</option>
+<option value="1">⭐ Very Poor</option>
+
+</select>
+
+<br><br>
+
+<textarea id="feedbackMessage" placeholder="Write your feedback here..." rows="4" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;"></textarea>
+
+<br><br>
+
+<button onclick="submitFeedback()">Submit Feedback</button>
 
 </div>
 

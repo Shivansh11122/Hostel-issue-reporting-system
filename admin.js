@@ -1,32 +1,34 @@
-// Load complaints from localStorage
-function loadComplaints(){
+async function loadComplaints(){
 
-let complaints = JSON.parse(localStorage.getItem("complaints")) || []
+let response = await fetch("http://localhost:3000/complaints")
+
+let complaints = await response.json()
 
 let table = document.getElementById("complaintTable")
 
 if(!table) return
 
-table.innerHTML = ""
+table.innerHTML=""
 
 complaints.forEach((c,index)=>{
 
 let row = `<tr>
 
+<td>${c.block}</td>
 <td>${c.room}</td>
 <td>${c.issue}</td>
+<td>${c.staff || "Not Assigned"}</td>
 <td>${c.priority}</td>
+<td><span class="pending">${c.status}</span></td>
 
 <td>
+<button onclick="updateStatus(${c.id}, 'Pending')" class="pending-btn">Pending</button>
+<button onclick="updateStatus(${c.id}, 'In Progress')" class="progress-btn">In Progress</button>
+<button onclick="updateStatus(${c.id}, 'Solved')" class="solved-btn">Solved</button>
+</td>
 
-<select onchange="updateStatus(${index}, this.value)">
-
-<option value="Pending" ${c.status=="Pending"?"selected":""}>Pending</option>
-<option value="In Progress" ${c.status=="In Progress"?"selected":""}>In Progress</option>
-<option value="Solved" ${c.status=="Solved"?"selected":""}>Solved</option>
-
-</select>
-
+<td>
+<button onclick="deleteComplaint(${c.id})">Delete</button>
 </td>
 
 </tr>`
@@ -35,28 +37,76 @@ table.innerHTML += row
 
 })
 
+updateSummary(complaints)
+
 }
+
 
 
 // Update complaint status
-function updateStatus(index,status){
+async function updateStatus(id,status){
 
-let complaints = JSON.parse(localStorage.getItem("complaints")) || []
+let response = await fetch(`http://localhost:3000/updateStatus/${id}`,{
 
-complaints[index].status = status
+method:"PUT",
 
-localStorage.setItem("complaints", JSON.stringify(complaints))
+headers:{
+"Content-Type":"application/json"
+},
 
-alert("Status Updated")
+body:JSON.stringify({status})
+
+})
+
+let data = await response.text()
+
+alert(data)
+
+loadComplaints()
+loadStaff()
 
 }
 
 
-// Logout
-function logout(){
-window.location="login.html"
+// Delete complaint
+async function deleteComplaint(id){
+
+if(confirm("Delete this complaint?")){
+
+let response = await fetch(`http://localhost:3000/deleteComplaint/${id}`,{
+method:"DELETE"
+})
+
+let message = await response.text()
+
+alert(message)
+
+loadComplaints()
+
 }
 
+}
+
+
+// Update summary cards
+function updateSummary(complaints){
+
+let total = complaints.length
+let pending = 0
+let solved = 0
+
+complaints.forEach(c=>{
+
+if(c.status==="Pending") pending++
+if(c.status==="Solved") solved++
+
+})
+
+document.getElementById("total").innerText = total
+document.getElementById("pending").innerText = pending
+document.getElementById("solved").innerText = solved
+
+}
 
 // Show dashboard sections
 function showSection(section){
@@ -64,6 +114,7 @@ function showSection(section){
 document.getElementById("complaints").style.display="none"
 document.getElementById("stats").style.display="none"
 document.getElementById("staff").style.display="none"
+document.getElementById("feedback").style.display="none"
 
 document.getElementById(section).style.display="block"
 
@@ -75,25 +126,33 @@ if(section==="staff"){
 loadStaff()
 }
 
+if(section==="feedback"){
+loadFeedback()
+}
+
 }
 
 
-// Chart
-function showChart(){
+// Complaint statistics chart
+async function showChart(){
 
-let complaints = JSON.parse(localStorage.getItem("complaints")) || []
+let response = await fetch("http://localhost:3000/complaints")
 
-let high=0
-let medium=0
-let low=0
+let complaints = await response.json()
 
-complaints.forEach(c=>{
-if(c.priority==1) high++
-else if(c.priority==2) medium++
+let high = 0
+let medium = 0
+let low = 0
+
+complaints.forEach(c => {
+
+if(c.priority == 1) high++
+else if(c.priority == 2) medium++
 else low++
+
 })
 
-let ctx=document.getElementById("complaintChart")
+let ctx = document.getElementById("complaintChart")
 
 if(!ctx) return
 
@@ -115,35 +174,47 @@ backgroundColor:["red","orange","green"]
 // Staff list
 let staff=[
 
-{name:"Raj",skill:"Electricity"},
-{name:"Amit",skill:"Water"},
-{name:"Suresh",skill:"WiFi"},
-{name:"Ravi",skill:"Furniture"},
-{name:"Deepak",skill:"Cleaning"}
 
-]
+{name:"Raj",skill:"Electricity",status:"Available"},
+{name:"Amit",skill:"Water",status:"Available"},
+{name:"Suresh",skill:"WiFi",status:"Busy"},
+{name:"Ravi",skill:"Furniture",status:"Available"},
+{name:"Deepak",skill:"Cleaning",status:"Available"}
+
+];
+
+
 
 
 // Load staff table
-function loadStaff(){
+async function loadStaff(){
 
-let table=document.getElementById("staffTable")
+let staffResponse = await fetch("http://localhost:3000/staff")
+let staff = await staffResponse.json()
+
+let complaintsResponse = await fetch("http://localhost:3000/complaints")
+let complaints = await complaintsResponse.json()
+
+let table = document.getElementById("staffTable")
 
 if(!table) return
 
-let complaints = JSON.parse(localStorage.getItem("complaints")) || []
-
 table.innerHTML=""
 
-staff.forEach(function(s){
+staff.forEach(s => {
 
-let assigned = complaints.find(c=>c.issue===s.skill)
+let assigned = complaints.find(c => c.staff === s.name && c.status !== "Solved")
 
-let row=`<tr>
+let status = assigned ? "Busy" : "Available"
+
+let issue = assigned ? assigned.issue : "None"
+
+let row = `<tr>
 
 <td>${s.name}</td>
 <td>${s.skill}</td>
-<td>${assigned ? assigned.issue : "None"}</td>
+<td>${status}</td>
+<td>${issue}</td>
 
 </tr>`
 
@@ -153,8 +224,46 @@ table.innerHTML += row
 
 }
 
+// Logout
+function logout(){
+window.location="login.html"
+}
+
 
 // Run when page loads
 window.onload = function(){
+
 loadComplaints()
+
+}
+function loadFeedback(){
+
+let feedbacks = JSON.parse(localStorage.getItem("feedbacks")) || []
+
+let table = document.getElementById("feedbackTable")
+
+if(!table) return
+
+table.innerHTML=""
+
+feedbacks.forEach(function(f){
+
+let stars = ""
+
+for(let i=0;i<f.rating;i++){
+stars += "⭐"
+}
+
+let row = `<tr>
+
+<td>${f.student}</td>
+<td>${stars}</td>
+<td>${f.message}</td>
+
+</tr>`
+
+table.innerHTML += row
+
+})
+
 }
